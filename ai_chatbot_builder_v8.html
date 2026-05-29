@@ -1,0 +1,879 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BotForge — AI Chatbot Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0f0e0d;--ink2:#4a4845;--ink3:#8a8784;
+  --bg:#faf9f7;--bg2:#f2f0ec;--bg3:#e8e4de;
+  --accent:#1a1a2e;--accent2:#16213e;--gold:#c9a84c;--gold2:#f0c96b;
+  --green:#1d7a5f;--red:#b03a2e;
+  --border:#e0dbd3;--radius:12px;--radius-sm:8px;
+  --ff-head:'Syne',sans-serif;--ff-body:'DM Sans',sans-serif;
+  --shadow:0 2px 12px rgba(0,0,0,0.06);--shadow-md:0 4px 24px rgba(0,0,0,0.1);
+}
+body{font-family:var(--ff-body);background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:var(--ff-body);cursor:pointer;border:none;outline:none}
+input,textarea{font-family:var(--ff-body);outline:none}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{background:var(--accent);display:flex;flex-direction:column}
+.logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo .mark{font-family:var(--ff-head);font-size:20px;font-weight:700;letter-spacing:-.3px;color:#fff}
+.logo .mark span{color:var(--gold2)}
+.logo .sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.snav{padding:16px 12px;flex:1}
+.nlbl{font-size:10px;color:rgba(255,255,255,.25);font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:12px 12px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .15s;color:rgba(255,255,255,.6);font-size:13.5px;font-weight:400;margin-bottom:2px;user-select:none}
+.ni:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
+.ni.active{background:rgba(255,255,255,.12);color:#fff;font-weight:500}
+.ni.off{opacity:.3;pointer-events:none}
+.nicon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(255,255,255,.07);flex-shrink:0}
+.ni.active .nicon{background:var(--gold);color:var(--accent)}
+.ndiv{height:1px;background:rgba(255,255,255,.07);margin:10px 12px}
+.newbtn{margin:0 12px 4px;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;border:1.5px dashed rgba(255,255,255,.15);background:transparent}
+.newbtn:hover{border-color:var(--gold);color:var(--gold2);background:rgba(201,168,76,.06)}
+.sfooter{padding:16px;border-top:1px solid rgba(255,255,255,.08)}
+.spill{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold2);font-size:11px;padding:6px 12px;border-radius:20px;text-align:center;font-weight:500}
+.main{overflow-y:auto;height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:50}
+.tbtitle{font-size:16px;font-weight:600;letter-spacing:-.2px}
+.tbtitle span{color:var(--ink3);font-weight:400}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;transition:all .15s;cursor:pointer}
+.ghost{background:transparent;border:1px solid var(--border);color:var(--ink2)}
+.ghost:hover{border-color:var(--ink3);background:var(--bg2)}
+.primary{background:var(--accent);color:#fff;border:none}
+.primary:hover{background:var(--accent2)}
+.gold{background:var(--gold);color:#1a1200;border:none;font-weight:600}
+.gold:hover{background:var(--gold2)}
+.sm{padding:6px 12px;font-size:12px}
+.danger{background:#fdf2f2;color:var(--red);border:1px solid #f5c6c3}
+.danger:hover{background:#fbe4e3}
+.content{padding:32px}
+.sec{display:none}.sec.on{display:block}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.ctitle{font-size:15px;font-weight:600;margin-bottom:4px;letter-spacing:-.2px}
+.csub{font-size:13px;color:var(--ink3);margin-bottom:20px}
+/* HOME */
+.hdr h1{font-family:var(--ff-head);font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}
+.hdr p{font-size:14px;color:var(--ink3);margin-bottom:28px}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.sbox{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.sbox-n{font-size:28px;font-weight:500;letter-spacing:-1px}
+.sbox-l{font-size:12px;color:var(--ink3);margin-top:4px}
+.sbox-c{font-size:11px;color:var(--green);font-weight:500;margin-top:6px}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center}
+.empty-ic{width:72px;height:72px;border-radius:20px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px}
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.bcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.bcard:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.bcard-top{position:absolute;top:0;left:0;right:0;height:3px}
+.bcard-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.bcard-av{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.bcard-mn{opacity:0;transition:opacity .15s;display:flex;gap:4px}
+.bcard:hover .bcard-mn{opacity:1}
+.mbtn{width:28px;height:28px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--ink3);cursor:pointer}
+.nbcard{background:transparent;border:2px dashed var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:180px}
+.nbcard:hover{border-color:var(--accent);background:rgba(26,26,46,.02)}
+.nbcard-ic{width:48px;height:48px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .15s}
+.nbcard:hover .nbcard-ic{background:var(--accent)}
+.bdg{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.bdg-a{background:#eef7f4;color:var(--green);border:1px solid #b8ddd4}
+.bdg-d{background:var(--bg2);color:var(--ink3);border:1px solid var(--border)}
+.bdg-g{background:#eef7f4;color:var(--green);border:1px solid #b8ddd4;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.bdg-gr{background:var(--bg2);color:var(--ink3);border:1px solid var(--border);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500}
+/* OVERVIEW */
+.ovgrid{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+.bpro{display:flex;align-items:center;gap:16px;padding:20px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:20px}
+.bav{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#fff;flex-shrink:0}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.sc{background:var(--bg);border-radius:var(--radius-sm);padding:14px 16px;text-align:center}
+.sn{font-size:24px;font-weight:500;letter-spacing:-.5px}
+.sl{font-size:11px;color:var(--ink3);margin-top:3px}
+.tbadges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+/* CHAT */
+.cw{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md)}
+.ch{padding:14px 16px;display:flex;align-items:center;gap:10px}
+.chav{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.cms{height:300px;overflow-y:auto;padding:16px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
+.msg{max-width:78%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.5}
+.mb{background:#fff;border:1px solid var(--border);border-radius:4px 12px 12px 12px;align-self:flex-start}
+.mu{background:var(--accent);color:#fff;border-radius:12px 4px 12px 12px;align-self:flex-end}
+.fqc{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px solid var(--border);background:#fff}
+.fq{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:12px;cursor:pointer;transition:all .15s;color:var(--ink2)}
+.fq:hover{border-color:var(--accent);color:var(--accent)}
+.cir{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:#fff}
+.ci{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--bg);color:var(--ink)}
+.ci:focus{border-color:var(--accent)}
+.cs{background:var(--accent);color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500}
+.td{width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:bl 1.4s infinite both;display:inline-block;margin:0 2px}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.kbb{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:12px}
+.kbdot{width:8px;height:8px;border-radius:50%;background:var(--ink3);flex-shrink:0}
+.kbdot.on{background:var(--green)}
+/* TRAINING */
+.ttabs{display:flex;gap:2px;background:var(--bg2);border-radius:10px;padding:3px;margin-bottom:24px}
+.tt{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:400;background:transparent;color:var(--ink3);transition:all .15s;text-align:center}
+.tt.active{background:#fff;color:var(--ink);box-shadow:var(--shadow);font-weight:500}
+.tp{display:none}.tp.active{display:block}
+.dz{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 24px;text-align:center;cursor:pointer;transition:all .15s}
+.dz:hover,.dz.dragging{border-color:var(--accent);background:rgba(26,26,46,.03)}
+.ta{width:100%;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13.5px;line-height:1.6;resize:vertical;min-height:220px;background:#fff;color:var(--ink)}
+.ta:focus{border-color:var(--accent)}
+.urlinp{flex:1;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13.5px;background:#fff;color:var(--ink)}
+.urlinp:focus{border-color:var(--accent)}
+.fl{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.fitem{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.fic{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--bg2)}
+.hbanner{background:rgba(26,26,46,.03);border:1px solid rgba(26,26,46,.1);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;display:flex;gap:12px}
+.fg{margin-bottom:18px}
+.flbl{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px;display:block}
+.finp{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13.5px;background:#fff;color:var(--ink)}
+.finp:focus{border-color:var(--accent)}
+.fta{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13.5px;line-height:1.5;resize:vertical;min-height:80px;background:#fff;color:var(--ink)}
+.fta:focus{border-color:var(--accent)}
+.tgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
+.tsw{height:48px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .15s;position:relative}
+.tsw.sel{border-color:var(--ink);transform:scale(1.05)}
+.tsw::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.9);font-size:16px;opacity:0;transition:opacity .15s}
+.tsw.sel::after{opacity:1}
+.fqil{display:flex;flex-direction:column;gap:6px}
+.fqir{display:flex;gap:6px}
+.fqin{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;background:#fff;color:var(--ink)}
+.fqrm{width:32px;height:32px;border-radius:8px;background:var(--bg2);color:var(--ink3);border:1px solid var(--border);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.fqrm:hover{background:#fdf2f2;color:var(--red);border-color:#f5c6c3}
+.ppanel{position:sticky;top:88px}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+/* EMBED */
+.ehero{background:linear-gradient(135deg,#1a1a2e,#2d2b55);border-radius:var(--radius);padding:32px;margin-bottom:24px;color:#fff;position:relative;overflow:hidden}
+.ehero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.ehtitle{font-family:var(--ff-head);font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px}
+.ehsub{font-size:13px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:20px}
+.esteps{display:flex;gap:16px}
+.estep{display:flex;gap:10px;align-items:flex-start;flex:1}
+.enum{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1a1200;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ecsec{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.echdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.codeblk{background:#1e1e2e;overflow:hidden}
+.codeblk pre{padding:20px;font-size:11.5px;line-height:1.8;color:#cdd6f4;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:340px;overflow-y:auto}
+.pvbox{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.mocksite{background:#fff;border:1px solid var(--border);border-radius:8px;min-height:160px;position:relative;padding:20px}
+.msn{height:10px;background:var(--bg2);border-radius:3px;width:100%;margin-bottom:10px}
+.msh{height:50px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border-radius:6px;margin-bottom:10px}
+.mst{height:7px;background:var(--bg2);border-radius:3px;margin-bottom:5px}
+.mst.w70{width:70%}.mst.w50{width:50%}
+.mbubble{position:absolute;bottom:12px;right:12px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:pls 2s infinite}
+@keyframes pls{0%,100%{box-shadow:0 4px 12px rgba(0,0,0,.2)}50%{box-shadow:0 6px 24px rgba(0,0,0,.35)}}
+.eplats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.epc{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;transition:all .15s;cursor:pointer}
+.epc:hover{border-color:var(--accent);background:var(--bg)}
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.mo.open{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:16px;padding:32px;width:480px;max-width:90vw;transform:translateY(16px) scale(.98);transition:transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mo.open .modal{transform:translateY(0) scale(1)}
+.mtitle{font-family:var(--ff-head);font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.msub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+.mfg{margin-bottom:16px}
+.mlbl{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px;display:block}
+.minp{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;background:var(--bg);color:var(--ink)}
+.minp:focus{border-color:var(--accent);background:#fff}
+.mta{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13.5px;resize:vertical;min-height:80px;background:var(--bg);color:var(--ink);line-height:1.5}
+.mta:focus{border-color:var(--accent);background:#fff}
+.tgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
+.topt{padding:12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+.topt:hover,.topt.sel{border-color:var(--accent);background:rgba(26,26,46,.04)}
+.cdrow{display:flex;gap:6px;margin-top:6px}
+.cdot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.cdot.sel{border-color:var(--ink);transform:scale(1.1)}
+.mact{display:flex;gap:8px;justify-content:flex-end;margin-top:24px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transform:translateY(10px);transition:all .3s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+</style>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><div class="mark">Bot<span>Forge</span></div><div class="sub">AI Chatbot Builder</div></div>
+    <nav class="snav">
+      <div class="nlbl">Main</div>
+      <div class="ni active" id="n-home" onclick="goHome(this)"><div class="nicon">🏠</div>Home</div>
+      <div class="ndiv"></div>
+      <div class="nlbl" id="blbl" style="display:none">Builder</div>
+      <div class="ni off" id="n-ov" onclick="showSec('ov',this)"><div class="nicon">🧠</div>Overview</div>
+      <div class="ni off" id="n-tr" onclick="showSec('tr',this)"><div class="nicon">⚡</div>Training</div>
+      <div class="ni off" id="n-ap" onclick="showSec('ap',this)"><div class="nicon">🎨</div>Appearance</div>
+      <div class="ni off" id="n-em" onclick="showSec('em',this)"><div class="nicon">🔗</div>Embed</div>
+    </nav>
+    <div style="padding:0 12px 12px">
+      <button class="newbtn" onclick="openModal()">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">＋</div>
+        Create New Chatbot
+      </button>
+    </div>
+    <div class="sfooter"><div class="spill" id="spill">No chatbots yet</div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="tbtitle" id="tbtitle">Home <span>/ All Chatbots</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost sm">Docs</button>
+        <button class="btn gold sm" onclick="openModal()">+ New Chatbot</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- HOME -->
+      <div class="sec on" id="s-home">
+        <div class="hdr"><h1>Your Chatbots</h1><p>Build, train, and embed AI chatbots into any website.</p></div>
+        <div class="srow" id="srow" style="display:none">
+          <div class="sbox"><div class="sbox-n" id="sbc">0</div><div class="sbox-l">Total chatbots</div><div class="sbox-c" id="sbch"></div></div>
+          <div class="sbox"><div class="sbox-n">—</div><div class="sbox-l">Messages this week</div><div class="sbox-c" style="color:var(--ink3)">No data yet</div></div>
+          <div class="sbox"><div class="sbox-n">—</div><div class="sbox-l">Avg. satisfaction</div><div class="sbox-c" style="color:var(--ink3)">No data yet</div></div>
+        </div>
+        <div id="es">
+          <div class="empty">
+            <div class="empty-ic">🤖</div>
+            <div style="font-family:var(--ff-head);font-size:18px;font-weight:700;margin-bottom:8px">No chatbots yet</div>
+            <div style="font-size:13px;color:var(--ink3);line-height:1.6;max-width:320px;margin-bottom:24px">Create your first AI chatbot, train it on your content, and embed it anywhere with one copy-paste.</div>
+            <button class="btn primary" onclick="openModal()" style="padding:10px 24px;font-size:14px">+ Create your first chatbot</button>
+          </div>
+        </div>
+        <div id="bs" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font-size:14px;font-weight:600;letter-spacing:-.2px">All Chatbots</div>
+            <input style="border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;background:#fff;width:180px;outline:none" placeholder="🔍  Search…"/>
+          </div>
+          <div class="bgrid" id="bgrid">
+            <div class="nbcard" onclick="openModal()">
+              <div class="nbcard-ic">＋</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink2)">Create New Chatbot</div>
+              <div style="font-size:11px;color:var(--ink3);text-align:center">Start from scratch or pick a template</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="sec" id="s-ov">
+        <div class="ovgrid">
+          <div>
+            <div class="card">
+              <div class="bpro">
+                <div class="bav" id="ov-av" style="background:var(--accent)">🧠</div>
+                <div>
+                  <div style="font-size:17px;font-weight:600;letter-spacing:-.3px" id="ov-name">Bot</div>
+                  <div style="font-size:12px;color:var(--ink3);margin-top:2px">Claude Sonnet · <span id="ov-kbs" style="color:var(--ink3)">No training data</span></div>
+                </div>
+              </div>
+              <div class="sgrid">
+                <div class="sc"><div class="sn" id="st-src">0</div><div class="sl">Sources</div></div>
+                <div class="sc"><div class="sn" id="st-ch">0</div><div class="sl">Characters</div></div>
+                <div class="sc"><div class="sn" id="st-qa">0</div><div class="sl">Q&A pairs</div></div>
+              </div>
+              <div class="ctitle" style="margin-bottom:8px">Knowledge Base</div>
+              <div class="tbadges" id="ov-badges"><span class="bdg-gr">No sources yet — go to Training</span></div>
+            </div>
+            <div class="card">
+              <div class="ctitle">Quick Actions</div><div class="csub">Manage and deploy your chatbot</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn ghost sm" onclick="showSec('tr',document.getElementById('n-tr'))">+ Add Training Data</button>
+                <button class="btn ghost sm" onclick="showSec('ap',document.getElementById('n-ap'))">✏️ Edit Appearance</button>
+                <button class="btn primary sm" onclick="showSec('em',document.getElementById('n-em'))">🔗 Get Embed Code</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px">Live Preview</div>
+            <div class="kbb"><div class="kbdot" id="kbdot"></div><div style="flex:1;font-size:12px;color:var(--ink3)" id="kbtxt">No knowledge base — add training data</div><div style="font-size:11px;font-weight:600" id="kbcnt">0 chars</div></div>
+            <div class="cw">
+              <div class="ch" id="ch" style="background:var(--accent)">
+                <div class="chav" id="chav" style="background:rgba(255,255,255,.15)">🧠</div>
+                <div><div style="font-size:13px;font-weight:600;color:#fff" id="chname">Bot</div><div style="font-size:11px;color:rgba(255,255,255,.7)">● Online</div></div>
+              </div>
+              <div class="cms" id="cms"><div class="msg mb" id="gmsg">👋 Hi! How can I help?</div></div>
+              <div class="fqc" id="fqc">
+                <button class="fq" onclick="sfaq(this)">What do you offer?</button>
+                <button class="fq" onclick="sfaq(this)">How does it work?</button>
+                <button class="fq" onclick="sfaq(this)">Pricing plans</button>
+              </div>
+              <div class="cir">
+                <input class="ci" id="ci" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendMsg()"/>
+                <button class="cs" id="csbtn" onclick="sendMsg()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRAINING -->
+      <div class="sec" id="s-tr">
+        <div class="card" style="margin-bottom:0">
+          <div class="ctitle">Train Your Chatbot</div>
+          <div class="csub">Everything you add is used by your bot when answering questions.</div>
+          <div class="hbanner">
+            <div style="font-size:20px;flex-shrink:0">💡</div>
+            <div style="font-size:12.5px;color:var(--ink2);line-height:1.6;margin-left:4px"><strong>How it works:</strong> All content is compiled into a knowledge base. Claude reads it before every reply. More detail = better answers.</div>
+          </div>
+          <div class="ttabs">
+            <button class="tt active" onclick="showTab('tx',this)">✍️ Text / Paste</button>
+            <button class="tt" onclick="showTab('qa',this)">💬 Q&amp;A Pairs</button>
+            <button class="tt" onclick="showTab('fi',this)">📎 Files</button>
+            <button class="tt" onclick="showTab('ws',this)">🌐 Website</button>
+          </div>
+          <div class="tp active" id="tab-tx">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div><div class="ctitle" style="margin-bottom:2px">Paste Your Content</div><div style="font-size:12px;color:var(--green);font-weight:500">✅ Used directly by your chatbot</div></div>
+              <button class="btn ghost sm" onclick="pasteEx()">Load Example</button>
+            </div>
+            <textarea class="ta" id="txinp" placeholder="Paste anything here:&#10;• Company info, products, services&#10;• FAQs and answers&#10;• Pricing, policies, contact details" oninput="updateKB()"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+              <div style="font-size:11px;color:var(--ink3)"><span id="ccount">0</span> characters</div>
+              <div id="kbsaved" style="font-size:11px;color:var(--green);font-weight:500;display:none">✓ Saved to knowledge base</div>
+            </div>
+          </div>
+          <div class="tp" id="tab-qa">
+            <div class="ctitle" style="margin-bottom:4px">Q&amp;A Pairs</div>
+            <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:16px">✅ Exact answers added to knowledge base</div>
+            <div id="qalist">
+              <div class="qaitem" style="margin-bottom:12px;background:var(--bg);border-radius:8px;padding:12px;border:1px solid var(--border)">
+                <input class="finp" placeholder="Question:" style="margin-bottom:8px" oninput="updateKB()"/>
+                <div style="display:flex;gap:6px"><textarea class="fta" placeholder="Answer:" style="min-height:60px;flex:1" oninput="updateKB()"></textarea><button class="fqrm" onclick="this.closest('.qaitem').remove();updateKB()" style="height:60px;align-self:flex-end">✕</button></div>
+              </div>
+            </div>
+            <button class="btn ghost sm" onclick="addQA()">+ Add Q&amp;A Pair</button>
+          </div>
+          <div class="tp" id="tab-fi">
+            <div class="ctitle" style="margin-bottom:4px">Upload Files</div>
+            <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:16px">✅ Text extracted into knowledge base</div>
+            <div class="dz" onclick="document.getElementById('finput').click()" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="handleDrop(event)">
+              <div style="font-size:36px;margin-bottom:12px">📂</div>
+              <div style="font-size:14px;font-weight:500;color:var(--ink2);margin-bottom:4px">Drop files here or click to browse</div>
+              <div style="font-size:12px;color:var(--ink3)">TXT · MD · CSV</div>
+            </div>
+            <input type="file" id="finput" multiple accept=".txt,.md,.csv" style="display:none" onchange="handleFiles(this.files)"/>
+            <div class="fl" id="flist"></div>
+          </div>
+          <div class="tp" id="tab-ws">
+            <div class="ctitle" style="margin-bottom:4px">Website Content</div>
+            <div style="background:#fffbf0;border:1px solid #f0d58c;border-radius:8px;padding:14px;margin-bottom:16px;font-size:12.5px;color:#7a5d1a;line-height:1.6">
+              <strong>💡 Best approach:</strong> Open your website → Select All (Ctrl+A) → Copy → Paste into the <strong>Text / Paste</strong> tab.
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px"><input class="urlinp" id="urlinp" placeholder="https://yourwebsite.com (reference only)"/><button class="btn ghost" onclick="addURL()">Save URL</button></div>
+            <div id="urllist" style="display:flex;flex-direction:column;gap:6px"></div>
+          </div>
+          <div style="margin-top:24px;padding:16px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:13px;font-weight:600">Knowledge Base Summary</div>
+              <div style="font-size:11px;color:var(--ink3)" id="kbtotal">0 characters total</div>
+            </div>
+            <div id="kbsum" style="font-size:12px;color:var(--ink3)">Nothing added yet.</div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+            <button class="btn primary" onclick="saveKB()">💾 Save Knowledge Base</button>
+            <button class="btn ghost" onclick="showSec('ov',document.getElementById('n-ov'))">← Overview</button>
+            <div id="savest" style="font-size:12px;color:var(--green);font-weight:500;display:none">✓ Saved! Embed code updated.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="sec" id="s-ap">
+        <div class="agrid">
+          <div>
+            <div class="card">
+              <div class="ctitle">Bot Identity</div><div class="csub">Name and avatar</div>
+              <div class="fg"><label class="flbl">Chatbot Name</label><input class="finp" id="nameinp" value="" oninput="upPreview()" placeholder="e.g. Aria, Max, Sage…"/></div>
+              <div class="fg">
+                <label class="flbl">Avatar Emoji</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <span onclick="setEmoji(this,'🧠')" style="cursor:pointer;font-size:22px;padding:6px;border-radius:8px;border:1px solid var(--border)">🧠</span>
+                  <span onclick="setEmoji(this,'🤖')" style="cursor:pointer;font-size:22px;padding:6px;border-radius:8px;border:1px solid var(--border)">🤖</span>
+                  <span onclick="setEmoji(this,'💬')" style="cursor:pointer;font-size:22px;padding:6px;border-radius:8px;border:1px solid var(--border)">💬</span>
+                  <span onclick="setEmoji(this,'⭐')" style="cursor:pointer;font-size:22px;padding:6px;border-radius:8px;border:1px solid var(--border)">⭐</span>
+                  <span onclick="setEmoji(this,'🎯')" style="cursor:pointer;font-size:22px;padding:6px;border-radius:8px;border:1px solid var(--border)">🎯</span>
+                  <span onclick="setEmoji(this,'🦾')" style="cursor:pointer;font-size:22px;padding:6px;border-radius:8px;border:1px solid var(--border)">🦾</span>
+                </div>
+              </div>
+              <div class="fg"><label class="flbl">Greeting Message</label><textarea class="fta" id="greetinp" oninput="upPreview()" placeholder="Hi! I'm here to help…"></textarea></div>
+            </div>
+            <div class="card">
+              <div class="ctitle">Chat Theme</div><div class="csub">Header color</div>
+              <div class="tgrid">
+                <div class="tsw sel" style="background:#1a1a2e" onclick="setTheme('#1a1a2e',this)"></div>
+                <div class="tsw" style="background:#1d6a96" onclick="setTheme('#1d6a96',this)"></div>
+                <div class="tsw" style="background:#1d7a5f" onclick="setTheme('#1d7a5f',this)"></div>
+                <div class="tsw" style="background:#7c3aed" onclick="setTheme('#7c3aed',this)"></div>
+                <div class="tsw" style="background:#c9a84c" onclick="setTheme('#c9a84c',this)"></div>
+                <div class="tsw" style="background:#b03a2e" onclick="setTheme('#b03a2e',this)"></div>
+                <div class="tsw" style="background:#2c3e50" onclick="setTheme('#2c3e50',this)"></div>
+                <div class="tsw" style="background:#d64e6b" onclick="setTheme('#d64e6b',this)"></div>
+                <div class="tsw" style="background:#e07b39" onclick="setTheme('#e07b39',this)"></div>
+                <div class="tsw" style="background:#222" onclick="setTheme('#222',this)"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="ctitle">Suggested FAQs</div><div class="csub">Quick-reply chips shown to users</div>
+              <div class="fqil" id="fqil">
+                <div class="fqir"><input class="fqin" value="What do you offer?" oninput="upFaqs()"/><button class="fqrm" onclick="remFaq(this)">✕</button></div>
+                <div class="fqir"><input class="fqin" value="How does it work?" oninput="upFaqs()"/><button class="fqrm" onclick="remFaq(this)">✕</button></div>
+                <div class="fqir"><input class="fqin" value="Pricing plans" oninput="upFaqs()"/><button class="fqrm" onclick="remFaq(this)">✕</button></div>
+              </div>
+              <button class="btn ghost sm" onclick="addFaq()" style="margin-top:8px">+ Add Question</button>
+            </div>
+          </div>
+          <div class="ppanel">
+            <div style="font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px">Live Preview</div>
+            <div class="cw">
+              <div class="ch" id="pvhdr" style="background:var(--accent)">
+                <div id="pvav" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:15px">🧠</div>
+                <div><div id="pvname" style="font-size:13px;font-weight:600;color:#fff">Bot</div><div style="font-size:11px;color:rgba(255,255,255,.7)">● Online</div></div>
+              </div>
+              <div class="cms" style="height:240px"><div class="msg mb" id="pvgreet">👋 Hi! How can I help?</div></div>
+              <div class="fqc" id="pvfaqs">
+                <button class="fq">What do you offer?</button>
+                <button class="fq">How does it work?</button>
+                <button class="fq">Pricing plans</button>
+              </div>
+              <div class="cir"><input class="ci" placeholder="Ask anything…" readonly/><button class="cs" id="pvsbtn" style="background:var(--accent)">Send</button></div>
+            </div>
+            <button class="btn primary" style="width:100%;margin-top:12px" onclick="saveAp()">Save Appearance →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMBED -->
+      <div class="sec" id="s-em">
+        <div class="ehero">
+          <div class="ehtitle">🎉 Your chatbot is ready to embed!</div>
+          <div class="ehsub">The code below is <strong style="color:#fff">fully self-contained</strong> — it includes the entire widget engine + your bot's name, colors, FAQs, and knowledge base. Just copy and paste it before <code style="background:rgba(255,255,255,.15);padding:2px 6px;border-radius:4px">&lt;/body&gt;</code> on any website.</div>
+          <div class="esteps">
+            <div class="estep"><div class="enum">1</div><div><div style="font-size:12.5px;font-weight:500;margin-bottom:2px">Copy the code</div><div style="font-size:11px;color:rgba(255,255,255,.45)">Everything pre-filled</div></div></div>
+            <div class="estep"><div class="enum">2</div><div><div style="font-size:12.5px;font-weight:500;margin-bottom:2px">Paste before &lt;/body&gt;</div><div style="font-size:11px;color:rgba(255,255,255,.45)">Any website or CMS</div></div></div>
+            <div class="estep"><div class="enum">3</div><div><div style="font-size:12.5px;font-weight:500;margin-bottom:2px">Chat bubble appears</div><div style="font-size:11px;color:rgba(255,255,255,.45)">Bottom-right of your site</div></div></div>
+          </div>
+        </div>
+        <div class="pvbox">
+          <div style="font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>What visitors will see on your website</div>
+          <div class="mocksite">
+            <div class="msn"></div><div class="msh"></div>
+            <div class="mst"></div><div class="mst w70"></div><div class="mst w50"></div>
+            <div class="mbubble" id="mbubble" style="background:#1a1a2e">🧠</div>
+          </div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:10px;text-align:center">A floating chat bubble appears bottom-right. Clicking it opens the chatbot.</div>
+        </div>
+        <div class="ecsec">
+          <div class="echdr">
+            <div>
+              <div style="font-size:14px;font-weight:600;letter-spacing:-.2px">Your Embed Code</div>
+              <div style="font-size:12px;color:var(--ink3);margin-top:2px">Self-contained — no GitHub, no widget.js file needed. Just paste and go.</div>
+            </div>
+            <button class="btn primary sm" onclick="copyEmbed(this)">📋 Copy Code</button>
+          </div>
+          <div class="codeblk"><pre id="ecdisplay" style="font-size:11px"></pre></div>
+        </div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;letter-spacing:-.2px">Works on every platform</div>
+        <div class="eplats">
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">🔵</div><div style="font-size:11px;font-weight:500">WordPress</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">🛍️</div><div style="font-size:11px;font-weight:500">Shopify</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">▲</div><div style="font-size:11px;font-weight:500">Vercel</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">🟠</div><div style="font-size:11px;font-weight:500">Webflow</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">🟣</div><div style="font-size:11px;font-weight:500">Wix</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">🔴</div><div style="font-size:11px;font-weight:500">Squarespace</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">⚛️</div><div style="font-size:11px;font-weight:500">React / Vue</div></div>
+          <div class="epc"><div style="font-size:22px;margin-bottom:5px">🌐</div><div style="font-size:11px;font-weight:500">Any HTML</div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="mo" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mtitle">Create New Chatbot</div>
+    <div class="msub">Set up your AI assistant in seconds</div>
+    <div class="mfg"><label class="mlbl">Chatbot Name</label><input class="minp" id="mname" placeholder="e.g. Aria, Max, Sage…"/></div>
+    <div class="mfg"><label class="mlbl">What will it do?</label><textarea class="mta" id="mdesc" placeholder="e.g. Customer support, answering FAQs…"></textarea></div>
+    <div class="mfg">
+      <label class="mlbl">Template</label>
+      <div class="tgrid2">
+        <div class="topt sel" onclick="pickTpl(this)"><div style="font-size:20px;margin-bottom:4px">🎧</div><div style="font-size:12px;font-weight:600">Support Bot</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">Handle tickets &amp; FAQs</div></div>
+        <div class="topt" onclick="pickTpl(this)"><div style="font-size:20px;margin-bottom:4px">💰</div><div style="font-size:12px;font-weight:600">Sales Assistant</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">Convert &amp; qualify leads</div></div>
+        <div class="topt" onclick="pickTpl(this)"><div style="font-size:20px;margin-bottom:4px">🏢</div><div style="font-size:12px;font-weight:600">HR / Internal</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">Employee knowledge base</div></div>
+        <div class="topt" onclick="pickTpl(this)"><div style="font-size:20px;margin-bottom:4px">✨</div><div style="font-size:12px;font-weight:600">Blank Slate</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">Start from scratch</div></div>
+      </div>
+    </div>
+    <div class="mfg">
+      <label class="mlbl">Color theme</label>
+      <div class="cdrow">
+        <div class="cdot sel" style="background:#1a1a2e" onclick="pickColor(this,'#1a1a2e')"></div>
+        <div class="cdot" style="background:#1d6a96" onclick="pickColor(this,'#1d6a96')"></div>
+        <div class="cdot" style="background:#1d7a5f" onclick="pickColor(this,'#1d7a5f')"></div>
+        <div class="cdot" style="background:#7c3aed" onclick="pickColor(this,'#7c3aed')"></div>
+        <div class="cdot" style="background:#c9a84c" onclick="pickColor(this,'#c9a84c')"></div>
+        <div class="cdot" style="background:#b03a2e" onclick="pickColor(this,'#b03a2e')"></div>
+        <div class="cdot" style="background:#e07b39" onclick="pickColor(this,'#e07b39')"></div>
+      </div>
+    </div>
+    <div class="mact">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="createBot()">Create Chatbot →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── WIDGET ENGINE (self-contained, injected into embed code) ──
+const WIDGET_JS = String.raw`(function(C){
+var st=document.createElement('style');
+st.textContent='#bf-btn{position:fixed;bottom:24px;right:24px;z-index:999999;width:56px;height:56px;border-radius:50%;background:'+C.color+';color:#fff;font-size:24px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;font-family:sans-serif}#bf-btn:hover{transform:scale(1.08)}#bf-badge{position:fixed;bottom:68px;right:18px;z-index:1000000;background:#e53e3e;color:#fff;border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:sans-serif}#bf-badge.show{display:flex}#bf-win{position:fixed;bottom:92px;right:24px;z-index:999998;width:360px;height:520px;border-radius:16px;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;font-family:"Segoe UI",system-ui,sans-serif;transform:scale(.92) translateY(16px);opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .2s;transform-origin:bottom right}#bf-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}.bf-hd{padding:14px 16px;display:flex;align-items:center;gap:10px;background:'+C.color+';flex-shrink:0}.bf-av{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:16px}.bf-nm{font-size:14px;font-weight:600;color:#fff}.bf-st{font-size:11px;color:rgba(255,255,255,.7)}.bf-msgs{flex:1;overflow-y:auto;padding:14px;background:#f7f6f4;display:flex;flex-direction:column;gap:8px}.bf-msgs::-webkit-scrollbar{width:4px}.bf-msgs::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px}.bf-m{max-width:80%;padding:9px 12px;font-size:13px;line-height:1.5;word-break:break-word}.bf-bot{background:#fff;border:1px solid #e8e4de;border-radius:4px 12px 12px 12px;align-self:flex-start;color:#1a1a1a}.bf-usr{background:'+C.color+';color:#fff;border-radius:12px 4px 12px 12px;align-self:flex-end}.bf-typ{display:flex;gap:4px;align-items:center;padding:10px 14px;background:#fff;border:1px solid #e8e4de;border-radius:4px 12px 12px 12px;align-self:flex-start;width:fit-content}.bf-dot{width:6px;height:6px;border-radius:50%;background:#aaa;animation:bfd 1.4s infinite both}.bf-dot:nth-child(2){animation-delay:.2s}.bf-dot:nth-child(3){animation-delay:.4s}@keyframes bfd{0%,80%,100%{opacity:.2}40%{opacity:1}}.bf-faqs{display:flex;flex-wrap:wrap;gap:5px;padding:10px 14px;border-top:1px solid #ede9e3;background:#fff;flex-shrink:0}.bf-fq{padding:5px 11px;border-radius:20px;border:1px solid #e0dbd3;background:#fff;font-size:11.5px;cursor:pointer;color:#4a4845;transition:all .15s;font-family:inherit}.bf-fq:hover{border-color:'+C.color+';color:'+C.color+'}.bf-ir{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #ede9e3;background:#fff;flex-shrink:0}.bf-in{flex:1;border:1px solid #e0dbd3;border-radius:8px;padding:8px 12px;font-size:13px;background:#faf9f7;color:#1a1a1a;font-family:inherit;outline:none}.bf-in:focus{border-color:'+C.color+';background:#fff}.bf-snd{background:'+C.color+';color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}.bf-brand{text-align:center;padding:5px;font-size:10px;color:#bbb;background:#fff;flex-shrink:0;border-top:1px solid #f0ece6}@media(max-width:480px){#bf-win{width:calc(100vw - 16px);right:8px;bottom:80px;height:70vh}#bf-btn{bottom:16px;right:16px}}';
+document.head.appendChild(st);
+var btn=document.createElement('button');btn.id='bf-btn';btn.textContent=C.emoji;document.body.appendChild(btn);
+var bdg=document.createElement('div');bdg.id='bf-badge';bdg.textContent='1';document.body.appendChild(bdg);
+var win=document.createElement('div');win.id='bf-win';
+win.innerHTML='<div class="bf-hd"><div class="bf-av">'+C.emoji+'</div><div><div class="bf-nm">'+C.name+'</div><div class="bf-st">● Online now</div></div></div><div class="bf-msgs" id="bf-msgs"><div class="bf-m bf-bot">'+C.greeting+'</div></div><div class="bf-faqs" id="bf-faqs">'+C.faqs.map(function(f){return'<button class="bf-fq">'+f+'</button>';}).join('')+'</div><div class="bf-ir"><input class="bf-in" id="bf-in" placeholder="Type a message…"/><button class="bf-snd" id="bf-snd">Send</button></div><div class="bf-brand">Powered by BotForge</div>';
+document.body.appendChild(win);
+var open=false,hist=[],greeted=false;
+function toggle(){open=!open;win.classList.toggle('open',open);btn.textContent=open?'✕':C.emoji;bdg.classList.remove('show');if(open){greeted=true;setTimeout(function(){var i=document.getElementById('bf-in');if(i)i.focus();},300);}}
+btn.addEventListener('click',toggle);
+setTimeout(function(){if(!greeted)bdg.classList.add('show');},3000);
+win.querySelectorAll('.bf-fq').forEach(function(c){c.addEventListener('click',function(){var i=document.getElementById('bf-in');if(i){i.value=c.textContent;send();}});});
+document.getElementById('bf-in').addEventListener('keydown',function(e){if(e.key==='Enter')send();});
+document.getElementById('bf-snd').addEventListener('click',send);
+function addMsg(t,r){var d=document.createElement('div');d.className='bf-m bf-'+r;d.textContent=t;var m=document.getElementById('bf-msgs');m.appendChild(d);m.scrollTop=m.scrollHeight;}
+function send(){
+  var inp=document.getElementById('bf-in'),t=inp.value.trim();if(!t)return;inp.value='';
+  addMsg(t,'usr');hist.push({role:'user',content:t});
+  var fqs=document.getElementById('bf-faqs');if(fqs)fqs.style.display='none';
+  var typ=document.createElement('div');typ.className='bf-typ';typ.innerHTML='<div class="bf-dot"></div><div class="bf-dot"></div><div class="bf-dot"></div>';
+  var m=document.getElementById('bf-msgs');m.appendChild(typ);m.scrollTop=m.scrollHeight;
+  var sys='You are '+C.name+', a helpful AI assistant on a website.';
+  if(C.knowledge)sys+='\n\nKnowledge base:\n\n---\n'+C.knowledge+'\n---\n\nAnswer from it. If not covered, say so.';
+  sys+='\n\nBe concise and friendly. 1-3 sentences.';
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,system:sys,messages:hist})})
+  .then(function(r){return r.json();})
+  .then(function(d){var rep=(d.content||[]).map(function(c){return c.type==='text'?c.text:'';}).join('')||'Sorry, I could not respond.';hist.push({role:'assistant',content:rep});typ.remove();addMsg(rep,'bot');})
+  .catch(function(){typ.remove();addMsg('Connection error. Please try again.','bot');});
+}
+document.addEventListener('click',function(e){if(open&&!win.contains(e.target)&&!btn.contains(e.target))toggle();});
+})`;
+
+// ── STATE ──
+const API = "https://api.anthropic.com/v1/messages";
+// NOTE: pickedColor is the chosen color in modal — completely separate from all functions
+var pickedColor = "#1a1a2e";
+var bot = {name:"Bot", theme:"#1a1a2e", emoji:"🧠", greeting:"👋 Hi! How can I help?", faqs:["What do you offer?","How does it work?","Pricing plans"]};
+var chatHist = [];
+var botCount = 0;
+var kb = {
+  text:"", qa:"", file:"",
+  get all(){var p=[];if(this.text.trim())p.push(this.text.trim());if(this.qa.trim())p.push(this.qa.trim());if(this.file.trim())p.push(this.file.trim());return p.join("\n\n");},
+  get len(){return this.all.length;}
+};
+
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
+
+// ── EMBED GENERATOR ──
+function genEmbed(){
+  var knowledge = kb.all.slice(0,10000);
+  var cfg = JSON.stringify({
+    name: bot.name,
+    emoji: bot.emoji,
+    color: bot.theme,
+    greeting: bot.greeting,
+    faqs: bot.faqs,
+    knowledge: knowledge
+  }, null, 2);
+  return '<!-- BotForge: ' + bot.name + ' -->\n<script>\n' + WIDGET_JS + '(' + cfg + ');\n<\/script>';
+}
+
+function renderEmbed(){
+  var pre = document.getElementById('ecdisplay');
+  if(!pre) return;
+  var code = genEmbed();
+  // syntax highlight
+  pre.innerHTML = code
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(\/\/ BotForge.*)/g,'<span style="color:#6c7086">$1</span>')
+    .replace(/(&lt;!--.*?--&gt;)/g,'<span style="color:#6c7086">$1</span>')
+    .replace(/(&lt;\/?script&gt;)/g,'<span style="color:#f38ba8">$1</span>')
+    .replace(/\b(function|var|return|if|null)\b/g,'<span style="color:#cba6f7">$1</span>')
+    .replace(/("(?:[^"\\]|\\.)*?")/g,'<span style="color:#a6e3a1">$1</span>');
+  // update mock bubble
+  var mb = document.getElementById('mbubble');
+  if(mb){mb.style.background=bot.theme;mb.textContent=bot.emoji;}
+}
+
+function copyEmbed(btn){
+  navigator.clipboard.writeText(genEmbed()).then(function(){
+    btn.textContent='✓ Copied!';
+    setTimeout(function(){btn.textContent='📋 Copy Code';},2000);
+    toast('✓ Embed code copied! Paste it before </body> on your website.');
+  });
+}
+
+// ── KB ──
+function updateKB(){
+  kb.text = document.getElementById('txinp') ? document.getElementById('txinp').value : '';
+  var pairs=[];
+  document.querySelectorAll('.qaitem').forEach(function(i){
+    var q=i.querySelector('input') ? i.querySelector('input').value.trim() : '';
+    var a=i.querySelector('textarea') ? i.querySelector('textarea').value.trim() : '';
+    if(q&&a) pairs.push('Q: '+q+'\nA: '+a);
+  });
+  kb.qa = pairs.join('\n\n');
+  var tot = kb.len;
+  var cc=document.getElementById('ccount');if(cc)cc.textContent=kb.text.length.toLocaleString();
+  var ks=document.getElementById('kbsaved');if(ks&&tot>0)ks.style.display='block';
+  var dot=document.getElementById('kbdot'),txt=document.getElementById('kbtxt'),cnt=document.getElementById('kbcnt');
+  if(dot){if(tot>0){dot.classList.add('on');if(txt)txt.innerHTML='<span style="color:var(--ink);font-weight:500">Knowledge base active</span>';}else{dot.classList.remove('on');if(txt)txt.textContent='No knowledge base — add training data';}if(cnt)cnt.textContent=tot>0?tot.toLocaleString()+' chars':'0 chars';}
+  var sum=document.getElementById('kbsum'),totEl=document.getElementById('kbtotal');
+  if(totEl)totEl.textContent=tot.toLocaleString()+' characters total';
+  if(sum){if(tot===0){sum.textContent='Nothing added yet.';sum.style.color='var(--ink3)';}else{var p=[];if(kb.text.trim())p.push('✅ Custom text ('+kb.text.length.toLocaleString()+' chars)');if(kb.qa.trim())p.push('✅ Q&A pairs ('+kb.qa.length.toLocaleString()+' chars)');if(kb.file.trim())p.push('✅ File content ('+kb.file.length.toLocaleString()+' chars)');sum.innerHTML=p.map(function(x){return'<div style="color:var(--green);margin-bottom:4px">'+x+'</div>';}).join('');}}
+  var badges=document.getElementById('ov-badges'),kbst=document.getElementById('ov-kbs');
+  if(badges){var b=[];if(kb.text.trim())b.push('<span class="bdg-g">✓ Custom text</span>');if(kb.qa.trim())b.push('<span class="bdg-g">✓ Q&A pairs</span>');if(kb.file.trim())b.push('<span class="bdg-g">✓ File content</span>');if(!b.length)b.push('<span class="bdg-gr">No sources yet</span>');badges.innerHTML=b.join('');}
+  if(kbst){kbst.textContent=tot>0?'Knowledge base: '+tot.toLocaleString()+' chars':'No training data';kbst.style.color=tot>0?'var(--green)':'var(--ink3)';}
+  var ss=document.getElementById('st-src');if(ss)ss.textContent=(kb.text.trim()?1:0)+(kb.qa.trim()?1:0)+(kb.file.trim()?1:0);
+  var sc=document.getElementById('st-ch');if(sc)sc.textContent=tot>0?(tot/1000).toFixed(1)+'K':'0';
+  var sq=document.getElementById('st-qa');if(sq)sq.textContent=document.querySelectorAll('.qaitem').length;
+  renderEmbed();
+}
+
+function saveKB(){
+  updateKB();
+  var s=document.getElementById('savest');
+  if(s){s.style.display='block';setTimeout(function(){s.style.display='none';},3000);}
+  toast('✓ Saved! Embed code updated automatically.');
+}
+
+// ── NAVIGATION ──
+function homeState(){
+  var es=document.getElementById('es'),bss=document.getElementById('bs'),sr=document.getElementById('srow');
+  if(botCount===0){es.style.display='block';bss.style.display='none';sr.style.display='none';document.getElementById('spill').textContent='No chatbots yet';}
+  else{es.style.display='none';bss.style.display='block';sr.style.display='grid';document.getElementById('sbc').textContent=botCount;document.getElementById('sbch').textContent=botCount===1?'Your first one! 🎉':'Keep growing ↑';document.getElementById('spill').textContent=botCount+' chatbot'+(botCount!==1?'s':'')+' active';}
+}
+
+function enableNav(){
+  ['n-ov','n-tr','n-ap','n-em'].forEach(function(id){document.getElementById(id).classList.remove('off');});
+  document.getElementById('blbl').style.display='block';
+}
+
+function goHome(el){
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+  el.classList.add('active');
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});
+  document.getElementById('s-home').classList.add('on');
+  document.getElementById('tbtitle').innerHTML='Home <span>/ All Chatbots</span>';
+}
+
+function showSec(id,el){
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});
+  document.getElementById('s-'+id).classList.add('on');
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+  if(el) el.classList.add('active');
+  var titles={ov:'Overview',tr:'Training',ap:'Appearance',em:'Embed'};
+  document.getElementById('tbtitle').innerHTML=titles[id]+' <span>/ '+bot.name+'</span>';
+  if(id==='em') renderEmbed();
+}
+
+function openBot(name,theme,emoji){
+  bot.name=name; bot.theme=theme; bot.emoji=emoji;
+  bot.greeting="👋 Hi! I'm "+name+". How can I help you today?";
+  enableNav();
+  ['ov-name','chname','pvname'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=name;});
+  ['ov-av','chav','pvav'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=emoji;});
+  var ova=document.getElementById('ov-av');if(ova)ova.style.background=theme;
+  ['ch','pvhdr'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.background=theme;});
+  ['csbtn','pvsbtn'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.background=theme;});
+  ['gmsg','pvgreet'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=bot.greeting;});
+  var ni=document.getElementById('nameinp');if(ni)ni.value=name;
+  var gi=document.getElementById('greetinp');if(gi)gi.value=bot.greeting;
+  chatHist=[];
+  updateKB();
+  showSec('ov',document.getElementById('n-ov'));
+}
+
+// ── MODAL ──
+function openModal(){
+  document.getElementById('modal').classList.add('open');
+  setTimeout(function(){document.getElementById('mname').focus();},150);
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function pickTpl(el){document.querySelectorAll('.topt').forEach(function(t){t.classList.remove('sel');});el.classList.add('sel');}
+// pickedColor is a plain variable, pickColor is the function — no conflict
+function pickColor(el,c){
+  document.querySelectorAll('.cdot').forEach(function(d){d.classList.remove('sel');});
+  el.classList.add('sel');
+  pickedColor=c;
+}
+
+function createBot(){
+  var name = document.getElementById('mname').value.trim();
+  if(!name){toast('Please enter a name for your chatbot');document.getElementById('mname').focus();return;}
+  var emojis=['🤖','💬','⭐','🎯','🧩','🦾','🌟','🔮','🎪','🧸'];
+  var emoji = emojis[Math.floor(Math.random()*emojis.length)];
+  var color = pickedColor || '#1a1a2e';
+
+  // Create the card
+  var grid = document.getElementById('bgrid');
+  var card = document.createElement('div');
+  card.className = 'bcard';
+  card.innerHTML =
+    '<div class="bcard-top" style="background:'+color+'"></div>'+
+    '<div class="bcard-hd">'+
+      '<div class="bcard-av" style="background:'+color+'">'+emoji+'</div>'+
+      '<div class="bcard-mn">'+
+        '<button class="mbtn" onclick="event.stopPropagation();toast(\'Settings coming soon\')">⚙️</button>'+
+        '<button class="mbtn" id="del-btn-placeholder" onclick="event.stopPropagation()">🗑</button>'+
+      '</div>'+
+    '</div>'+
+    '<div style="font-size:15px;font-weight:600;letter-spacing:-.2px;margin-bottom:3px">'+name+'</div>'+
+    '<div style="font-size:12px;color:var(--ink3);line-height:1.5;margin-bottom:14px">Add training data, then copy the embed code.</div>'+
+    '<div style="display:flex;align-items:center;justify-content:space-between">'+
+      '<span class="bdg bdg-d">◌ Draft</span>'+
+      '<span style="font-size:11px;color:var(--ink3)">Just created</span>'+
+    '</div>';
+
+  // Wire up delete (must do after innerHTML since we need a reference)
+  card.querySelector('#del-btn-placeholder').onclick = function(e){
+    e.stopPropagation();
+    card.remove();
+    botCount--;
+    homeState();
+    toast('Bot deleted');
+  };
+  card.querySelector('#del-btn-placeholder').removeAttribute('id');
+
+  // Click card to open bot
+  card.onclick = function(){openBot(name, color, emoji);};
+
+  // Insert before the "Create New" card
+  grid.insertBefore(card, grid.lastElementChild);
+
+  botCount++;
+  homeState();
+  closeModal();
+  document.getElementById('mname').value = '';
+  document.getElementById('mdesc').value = '';
+  toast('✓ '+name+' created! Add training data, then get the embed code.');
+  setTimeout(function(){openBot(name, color, emoji);}, 400);
+}
+
+// ── TRAINING ──
+function showTab(id,el){
+  document.querySelectorAll('.tp').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tt').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+}
+function pasteEx(){
+  document.getElementById('txinp').value="ABOUT US\nAcme Corp — SaaS for growing businesses. Founded 2018, 10,000+ customers.\n\nPRODUCTS\n- Dashboard: Analytics ($29/mo)\n- Connect: Team collaboration ($49/mo)\n- Automate: Workflow automation ($99/mo)\n- Enterprise: All products + support (Custom)\n\nFAQS\nQ: How do I get started?\nA: Sign up at acme.com — 14-day free trial, no credit card.\n\nQ: Can I cancel anytime?\nA: Yes, cancel anytime. No fees.\n\nQ: Refunds?\nA: 30-day money-back guarantee.\n\nSUPPORT\nEmail: support@acme.com | Mon-Fri 9am-6pm EST";
+  updateKB();
+  toast('Example loaded! Head to Overview to test your bot.');
+}
+function addQA(){
+  var d=document.createElement('div');d.className='qaitem';
+  d.style.cssText='margin-bottom:12px;background:var(--bg);border-radius:8px;padding:12px;border:1px solid var(--border)';
+  d.innerHTML='<input class="finp" placeholder="Question:" style="margin-bottom:8px" oninput="updateKB()"/><div style="display:flex;gap:6px"><textarea class="fta" placeholder="Answer:" style="min-height:60px;flex:1" oninput="updateKB()"></textarea><button class="fqrm" onclick="this.closest(\'.qaitem\').remove();updateKB()" style="height:60px;align-self:flex-end">✕</button></div>';
+  document.getElementById('qalist').appendChild(d);
+  d.querySelector('input').focus();
+}
+function handleDrop(e){e.preventDefault();document.querySelector('.dz').classList.remove('dragging');handleFiles(e.dataTransfer.files);}
+function handleFiles(files){
+  var icons={TXT:'📃',MD:'📝',CSV:'📊'};
+  Array.from(files).forEach(function(f){
+    var ext=f.name.split('.').pop().toUpperCase();
+    var d=document.createElement('div');d.className='fitem';
+    d.innerHTML='<div class="fic">'+(icons[ext]||'📎')+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+f.name+'</div><div style="font-size:11px;color:var(--ink3)">'+(f.size/1024).toFixed(1)+' KB</div></div><span class="bdg-gr">⏳ Reading…</span><button class="btn danger sm" onclick="this.closest(\'.fitem\').remove()">✕</button>';
+    document.getElementById('flist').appendChild(d);
+    var r=new FileReader();
+    r.onload=function(e){kb.file+=(kb.file?'\n\n':'')+'['+f.name+']\n'+e.target.result;var b=d.querySelector('.bdg-gr');if(b){b.className='bdg-g';b.textContent='✓ Added';}updateKB();toast('✓ '+f.name+' added!');};
+    r.readAsText(f);
+  });
+}
+function addURL(){
+  var inp=document.getElementById('urlinp'),u=inp.value.trim();if(!u)return;
+  var d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:12px';
+  d.innerHTML='<span style="flex:1;color:var(--accent)">'+u+'</span><span class="bdg-gr">Reference</span><button class="btn danger sm" onclick="this.closest(\'div\').remove()">✕</button>';
+  document.getElementById('urllist').appendChild(d);inp.value='';
+  toast('URL saved. Paste its text content in the Text tab.');
+}
+
+// ── CHAT ──
+async function sendMsg(){
+  var inp=document.getElementById('ci'),text=inp.value.trim();if(!text)return;
+  addCMsg(text,'mu');inp.value='';chatHist.push({role:'user',content:text});
+  var typ=document.createElement('div');typ.className='msg mb';
+  typ.innerHTML='<span class="td"></span><span class="td"></span><span class="td"></span>';
+  var m=document.getElementById('cms');m.appendChild(typ);m.scrollTop=m.scrollHeight;
+  var kbData=kb.all;
+  var sys='You are '+bot.name+', a helpful AI assistant.';
+  if(kbData)sys+='\n\nKnowledge base:\n\n---\n'+kbData+'\n---\n\nAnswer from it. If not covered, say so.';
+  sys+='\n\nBe concise and friendly.';
+  try{
+    var r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,system:sys,messages:chatHist})});
+    var d=await r.json();
+    var rep=(d.content||[]).map(function(c){return c.type==='text'?c.text:'';}).join('')||"I'm having trouble responding.";
+    chatHist.push({role:'assistant',content:rep});typ.remove();addCMsg(rep,'mb');
+  }catch(e){typ.remove();addCMsg('Connection error.','mb');}
+}
+function sfaq(btn){document.getElementById('ci').value=btn.textContent;sendMsg();}
+function addCMsg(t,c){var d=document.createElement('div');d.className='msg '+c;d.textContent=t;var m=document.getElementById('cms');m.appendChild(d);m.scrollTop=m.scrollHeight;}
+
+// ── APPEARANCE ──
+function upPreview(){
+  var name=document.getElementById('nameinp').value||'Bot';
+  var greet=document.getElementById('greetinp').value||"👋 Hi! I'm "+name+". How can I help?";
+  bot.name=name;bot.greeting=greet;
+  document.getElementById('pvname').textContent=name;
+  document.getElementById('pvgreet').textContent=greet;
+  renderEmbed();
+}
+function setTheme(c,el){
+  bot.theme=c;
+  document.querySelectorAll('.tsw').forEach(function(s){s.classList.remove('sel');});el.classList.add('sel');
+  document.getElementById('pvhdr').style.background=c;
+  document.getElementById('pvsbtn').style.background=c;
+  renderEmbed();
+}
+function setEmoji(el,e){bot.emoji=e;document.getElementById('pvav').textContent=e;renderEmbed();}
+function upFaqs(){
+  var f=Array.from(document.querySelectorAll('#fqil .fqin')).map(function(i){return i.value;}).filter(Boolean);
+  bot.faqs=f;
+  document.getElementById('pvfaqs').innerHTML=f.map(function(x){return'<button class="fq">'+x+'</button>';}).join('');
+  document.getElementById('fqc').innerHTML=f.map(function(x){return'<button class="fq" onclick="sfaq(this)">'+x+'</button>';}).join('');
+  renderEmbed();
+}
+function remFaq(btn){btn.closest('.fqir').remove();upFaqs();}
+function addFaq(){
+  var d=document.createElement('div');d.className='fqir';
+  d.innerHTML='<input class="fqin" placeholder="Type a question…" oninput="upFaqs()"/><button class="fqrm" onclick="remFaq(this)">✕</button>';
+  document.getElementById('fqil').appendChild(d);d.querySelector('input').focus();
+}
+function saveAp(){
+  var name=document.getElementById('nameinp').value||bot.name;
+  bot.name=name;
+  document.getElementById('chname').textContent=name;
+  document.getElementById('ov-name').textContent=name;
+  document.getElementById('ch').style.background=bot.theme;
+  document.getElementById('csbtn').style.background=bot.theme;
+  document.getElementById('chav').textContent=bot.emoji;
+  renderEmbed();
+  toast('✓ Appearance saved!');
+  setTimeout(function(){showSec('em',document.getElementById('n-em'));},600);
+}
+
+// init
+homeState();
+renderEmbed();
+</script>
